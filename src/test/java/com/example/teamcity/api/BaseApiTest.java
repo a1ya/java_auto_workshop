@@ -29,7 +29,7 @@ public class BaseApiTest extends BaseTest {
                 .spec(Specifications.getSpec().superUserSpec())
                 .body(requestBody)
                 .put("/app/rest/server/authSettings")
-                .then().assertThat().statusCode(HttpStatus.SC_OK);;
+                .then().assertThat().statusCode(HttpStatus.SC_OK);
     }
 
     @AfterMethod
