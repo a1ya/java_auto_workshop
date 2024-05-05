@@ -2,6 +2,10 @@
 GET http://admin:admin@172.31.43.219:8111/authenticationTest.html?csrf
 Accept: application/json
 
+### 0.1. generate auth token
+GET http://172.31.43.219:8111/authenticationTest.html?csrf
+Accept: application/json
+
 ### 1. create project
 POST http://172.31.43.219:8111/app/rest/projects
 Content-Type: application/json
@@ -78,3 +82,61 @@ GET http://172.31.43.219:8111/app/rest/builds/104
 Content-Type: application/json
 Accept: application/json
 X-TC-CSRF-Token: 59792b55-fe9f-4782-bfd3-c24b2085b2a6
+
+### 6. set perProjectPermissions
+GET http://172.31.43.219:8111/app/rest/server/authSettings
+Content-Type: application/json
+Accept: application/json
+X-TC-CSRF-Token: 71161606-08db-418d-8bf2-eef9d2282e35
+
+### 5. set perProjectPermissions
+PUT http://172.31.43.219:8111/app/rest/server/authSettings
+Content-Type: application/json
+Accept: application/json
+X-TC-CSRF-Token: 71161606-08db-418d-8bf2-eef9d2282e35
+
+{
+  "allowGuest": false,
+  "guestUsername": "guest",
+  "collapseLoginForm": false,
+  "perProjectPermissions": false,
+  "emailVerification": false,
+  "modules": {
+    "module": [
+      {
+        "name": "Default",
+        "properties": {
+          "property": [
+            {
+              "name": "usersCanResetOwnPasswords",
+              "value": "true"
+            },
+            {
+              "name": "usersCanChangeOwnPasswords",
+              "value": "true"
+            },
+            {
+              "name": "freeRegistrationAllowed",
+              "value": "false"
+            }
+          ],
+          "count": 3
+        }
+      },
+      {
+        "name": "Token-Auth",
+        "properties": {
+          "property": [],
+          "count": 0
+        }
+      },
+      {
+        "name": "HTTP-Basic",
+        "properties": {
+          "property": [],
+          "count": 0
+        }
+      }
+    ]
+  }
+}

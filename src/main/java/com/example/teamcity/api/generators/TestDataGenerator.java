@@ -12,18 +12,27 @@ import java.util.Arrays;
 
 public class TestDataGenerator {
     public static TestData generate() {
-        var user = User.builder()
+        var user = generateUser();
+        var newProjectDescription = generateProject();
+        var buildType = generateBuild(newProjectDescription);
+
+        return TestData.builder()
+                .user(user)
+                .project(newProjectDescription)
+                .buildType(buildType)
+                .build();
+    }
+
+    public static User generateUser(){
+        return User.builder()
                 .username(RandomData.getString())
                 .password(RandomData.getString())
                 .email(RandomData.getString() + "@gmail.com")
-                .roles(Roles.builder()
-                        .role(Arrays.asList(Role.builder()
-                                .roleId("SYSTEM_ADMIN")
-                                .scope("g")
-                                .build()))
-                        .build())
                 .build();
-        var newProjectDescription = NewProjectDescription
+    }
+
+    public static NewProjectDescription generateProject(){
+        return NewProjectDescription
                 .builder()
                 .parentProject(Project.builder()
                         .locator("_Root")
@@ -32,17 +41,13 @@ public class TestDataGenerator {
                 .id(RandomData.getString())
                 .copyAllAssociatedSettings(true)
                 .build();
+    }
 
-        var buildType = BuildType.builder()
+    public static BuildType generateBuild(NewProjectDescription newProjectDescription){
+        return BuildType.builder()
                 .id(RandomData.getString())
                 .name(RandomData.getString())
                 .project(newProjectDescription)
-                .build();
-
-        return TestData.builder()
-                .user(user)
-                .project(newProjectDescription)
-                .buildType(buildType)
                 .build();
     }
 

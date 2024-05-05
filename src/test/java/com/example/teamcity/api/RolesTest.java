@@ -1,6 +1,7 @@
 package com.example.teamcity.api;
 
 import com.example.teamcity.api.enums.Role;
+import com.example.teamcity.api.generators.TestData;
 import com.example.teamcity.api.generators.TestDataGenerator;
 import com.example.teamcity.api.requests.UncheckedRequests;
 import com.example.teamcity.api.requests.checked.CheckedBuildConfig;
@@ -9,8 +10,10 @@ import com.example.teamcity.api.requests.unchecked.UncheckedBuildConfig;
 import com.example.teamcity.api.spec.Specifications;
 import org.apache.http.HttpStatus;
 import org.hamcrest.Matchers;
+import org.testng.annotations.Listeners;
 import org.testng.annotations.Test;
 
+@Listeners()
 public class RolesTest extends BaseApiTest {
     @Test
     public void unauthorizedUserShouldNotHaveRightToCreateProject() {
@@ -46,13 +49,11 @@ public class RolesTest extends BaseApiTest {
     public void projectAdminShouldHaveRightsToCreateBuildConfigToHisProject() {
         var testData = testDataStorage.addTestData();
 
-        checkedWithSuperUser.getProjectRequest()
-                .create(testData.getProject());
+        checkedWithSuperUser.getProjectRequest().create(testData.getProject());
 
         testData.getUser().setRoles(TestDataGenerator.generateRoles(Role.PROJECT_ADMIN, "p:" + testData.getProject().getId()));
 
-        checkedWithSuperUser.getUserRequest()
-                .create(testData.getUser());
+        checkedWithSuperUser.getUserRequest().create(testData.getUser());
 
         var buildConfig = new CheckedBuildConfig(Specifications.getSpec().authSpec(testData.getUser()))
                 .create(testData.getBuildType());
@@ -63,22 +64,25 @@ public class RolesTest extends BaseApiTest {
     @Test
     public void projectAdminShouldNotHaveRightsToCreateBuildConfigToAnotherProject() {
 
-        var firstTestData = testDataStorage.addTestData();
-        var secondTestData = testDataStorage.addTestData();
+        TestData firstTestData = testDataStorage.addTestData();
+        TestData secondTestData = testDataStorage.addTestData();
 
         checkedWithSuperUser.getProjectRequest().create(firstTestData.getProject());
         checkedWithSuperUser.getProjectRequest().create(secondTestData.getProject());
 
-        checkedWithSuperUser.getUserRequest().create(firstTestData.getUser());
         firstTestData.getUser().setRoles(TestDataGenerator.
                 generateRoles(Role.PROJECT_ADMIN, "p:" + firstTestData.getProject().getId()));
+        checkedWithSuperUser.getUserRequest().create(firstTestData.getUser());
 
-        checkedWithSuperUser.getUserRequest().create(secondTestData.getUser());
         secondTestData.getUser().setRoles(TestDataGenerator.
                 generateRoles(Role.PROJECT_ADMIN, "p:" + secondTestData.getProject().getId()));
+        checkedWithSuperUser.getUserRequest().create(secondTestData.getUser());
 
         new UncheckedBuildConfig(Specifications.getSpec().authSpec(secondTestData.getUser()))
                 .create(firstTestData.getBuildType())
-                .then().assertThat().statusCode(HttpStatus.SC_BAD_REQUEST);
+                .then().assertThat().statusCode(HttpStatus.SC_FORBIDDEN)
+                .body(Matchers.containsString("You do not have enough permissions to edit project with id: "
+                        + firstTestData.getProject().getId()));
     }
+
 }
