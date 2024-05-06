@@ -1,8 +1,11 @@
 package com.example.teamcity.api.models;
 
+import lombok.Data;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Data
 public class AuthSettings {
     private boolean perProjectPermissions;
     private Modules modules;
@@ -20,22 +23,6 @@ public class AuthSettings {
     }
 
     // Getters and setters
-
-    public boolean isPerProjectPermissions() {
-        return perProjectPermissions;
-    }
-
-    public void setPerProjectPermissions(boolean perProjectPermissions) {
-        this.perProjectPermissions = perProjectPermissions;
-    }
-
-    public Modules getModules() {
-        return modules;
-    }
-
-    public void setModules(Modules modules) {
-        this.modules = modules;
-    }
 
     // Utility method to create default module
     private Module createDefaultModule(String name, int count) {

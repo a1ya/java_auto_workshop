@@ -1,11 +1,9 @@
 package com.example.teamcity.api;
 
-import com.example.teamcity.api.enums.Role;
 import com.example.teamcity.api.generators.RandomData;
 import com.example.teamcity.api.generators.TestData;
 import com.example.teamcity.api.generators.TestDataGenerator;
 import com.example.teamcity.api.generators.TestDataStorage;
-import com.example.teamcity.api.models.NewProjectDescription;
 import com.example.teamcity.api.models.Project;
 import com.example.teamcity.api.requests.UncheckedRequests;
 import com.example.teamcity.api.requests.checked.CheckedProject;
@@ -21,18 +19,32 @@ public class ProjectTest extends BaseApiTest {
     private static final int MAX_ID_LENGTH = 225;
 
     @Test
-    public void projectWithValidMaxLengthIdCanBeCreated() {
-        String testString = "a" + RandomStringUtils.randomAlphanumeric(MAX_ID_LENGTH-1);
+    public void projectWithSpecialSymbolsInNameCanBeCreated() {
+        String testString = "This_is_a_string_with_special_symbols :!@#$%^&*()_+-=[]{}|;:',./<>?~`\"";
 
         TestData testData = TestDataStorage.getStorage().addTestData(TestData.builder()
                 .user(TestDataGenerator.generateUser())
-                .project(NewProjectDescription
-                        .builder()
-                        .name(RandomData.getString())
-                        .id(testString)
-                        .build())
+                .project(TestDataGenerator.generateProject(testString, RandomData.getString()))
                 .build());
-        testData.getUser().setRoles(TestDataGenerator.generateRoles(Role.SYSTEM_ADMIN, "g"));
+
+        new CheckedUser(Specifications.getSpec().superUserSpec()).create(testData.getUser());
+
+        Project project = new CheckedProject(Specifications.getSpec()
+                .authSpec(testData.getUser()))
+                .create(testData.getProject());
+
+        softy.assertThat(project.getName()).isEqualTo(testString);
+    }
+
+    @Test
+    public void projectWithValidIdWithMaxLengthCanBeCreated() {
+        String testString = "a" + RandomStringUtils.randomAlphanumeric(MAX_ID_LENGTH - 1);
+
+        TestData testData = TestDataStorage.getStorage().addTestData(TestData.builder()
+                .user(TestDataGenerator.generateUser())
+                .project(TestDataGenerator.generateProject(RandomData.getString(), testString))
+                .build());
+
         new CheckedUser(Specifications.getSpec().superUserSpec()).create(testData.getUser());
 
         Project project = new CheckedProject(Specifications.getSpec()
@@ -43,45 +55,19 @@ public class ProjectTest extends BaseApiTest {
     }
 
     @Test
-    public void projectWithSpecialSymbolsInNameCanBeCreated() {
-        String testString = "This_is_a_string_with_special_symbols :!@#$%^&*()_+-=[]{}|;:',./<>?~`\"";
+    public void projectWithIdLongerThanMaxLengthShouldNotBeCreated() {
+        String testString = RandomStringUtils.randomAlphanumeric(MAX_ID_LENGTH + 1);
 
         TestData testData = TestDataStorage.getStorage().addTestData(TestData.builder()
                 .user(TestDataGenerator.generateUser())
-                .project(NewProjectDescription
-                        .builder()
-                        .name(testString)
-                        .id(RandomData.getString())
-                        .build())
+                .project(TestDataGenerator.generateProject(RandomData.getString(), testString))
                 .build());
-        testData.getUser().setRoles(TestDataGenerator.generateRoles(Role.SYSTEM_ADMIN, "g"));
+
         new CheckedUser(Specifications.getSpec().superUserSpec()).create(testData.getUser());
-
-        Project project = new CheckedProject(Specifications.getSpec()
-                .authSpec(testData.getUser()))
-                .create(testData.getProject());
-
-        softy.assertThat(project.getName()).isEqualTo(testString);
-    }
-
-
-    @Test
-    public void projectWithIdBiggerThenMaxLengthShouldNotBeCreated() {
-        String testString = RandomStringUtils.randomAlphanumeric(MAX_ID_LENGTH+1);
-
-        TestData testData = TestDataStorage.getStorage().addTestData();
-        testData.getUser().setRoles(TestDataGenerator.generateRoles(Role.SYSTEM_ADMIN, "g"));
-        new CheckedUser(Specifications.getSpec().superUserSpec()).create(testData.getUser());
-
-        NewProjectDescription newProjectDescription = NewProjectDescription
-                .builder()
-                .name(RandomData.getString())
-                .id(testString)
-                .build();
 
         new UncheckedRequests(Specifications.getSpec().authSpec(testData.getUser())).getProjectRequest()
-                .create(newProjectDescription)
-                .then().assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR) //TODO: should be SC_BAD_REQUEST instead
+                .create(testData.getProject())
+                .then().assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR) //note: should be SC_BAD_REQUEST instead
                 .body(Matchers.containsString("Project ID \"" + testString
                         + "\" is invalid: it is 226 characters long while the maximum length is 225."));
     }
@@ -90,40 +76,34 @@ public class ProjectTest extends BaseApiTest {
     public void projectWithSpecialCharactersInIDShouldNotBeCreated() {
         String testString = "String_with_$peci@l_ch@r@cters";
 
-        TestData testData = TestDataStorage.getStorage().addTestData();
-        testData.getUser().setRoles(TestDataGenerator.generateRoles(Role.SYSTEM_ADMIN, "g"));
+        TestData testData = TestDataStorage.getStorage().addTestData(TestData.builder()
+                .user(TestDataGenerator.generateUser())
+                .project(TestDataGenerator.generateProject(RandomData.getString(), testString))
+                .build());
+
         new CheckedUser(Specifications.getSpec().superUserSpec()).create(testData.getUser());
 
-        NewProjectDescription newProjectDescription = NewProjectDescription
-                .builder()
-                .name(RandomData.getString())
-                .id(testString)
-                .build();
-
         new UncheckedRequests(Specifications.getSpec().authSpec(testData.getUser())).getProjectRequest()
-                .create(newProjectDescription)
-                .then().assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR) //TODO: should be SC_BAD_REQUEST instead
+                .create(testData.getProject())
+                .then().assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR) //note: should be SC_BAD_REQUEST instead
                 .body(Matchers.containsString("Project ID \"" + testString
-                        + "\" is invalid: contains unsupported character '$'. ID should start with a latin letter and contain only latin letters, digits and underscores (at most 225 characters)."));
+                        + "\" is invalid: contains unsupported character"));
     }
 
     @Test
     public void projectWithIDThatStartsWithNonLatinCharacterShouldNotBeCreated() {
         String testString = RandomStringUtils.randomNumeric(10);
 
-        TestData testData = TestDataStorage.getStorage().addTestData();
-        testData.getUser().setRoles(TestDataGenerator.generateRoles(Role.SYSTEM_ADMIN, "g"));
+        TestData testData = TestDataStorage.getStorage().addTestData(TestData.builder()
+                .user(TestDataGenerator.generateUser())
+                .project(TestDataGenerator.generateProject(RandomData.getString(), testString))
+                .build());
+
         new CheckedUser(Specifications.getSpec().superUserSpec()).create(testData.getUser());
 
-        NewProjectDescription newProjectDescription = NewProjectDescription
-                .builder()
-                .name(RandomData.getString())
-                .id(testString)
-                .build();
-
         new UncheckedRequests(Specifications.getSpec().authSpec(testData.getUser())).getProjectRequest()
-                .create(newProjectDescription)
-                .then().assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR) //TODO: should be SC_BAD_REQUEST instead
+                .create(testData.getProject())
+                .then().assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR) //note: should be SC_BAD_REQUEST instead
                 .body(Matchers.containsString("Project ID \"" + testString
                         + "\" is invalid: starts with non-letter character"));
     }
@@ -131,7 +111,7 @@ public class ProjectTest extends BaseApiTest {
     @Test
     public void projectWithAlreadyExistingIdShouldNotBeCreated() {
         TestData testData = TestDataStorage.getStorage().addTestData();
-        testData.getUser().setRoles(TestDataGenerator.generateRoles(Role.SYSTEM_ADMIN, "g"));
+
         new CheckedUser(Specifications.getSpec().superUserSpec()).create(testData.getUser());
 
         Project project = new CheckedProject(Specifications.getSpec()
@@ -140,14 +120,8 @@ public class ProjectTest extends BaseApiTest {
 
         softy.assertThat(project.getId()).isEqualTo(testData.getProject().getId());
 
-        NewProjectDescription newProjectDescription = NewProjectDescription
-                .builder()
-                .name(RandomData.getString())
-                .id(testData.getProject().getId())
-                .build();
-
         new UncheckedRequests(Specifications.getSpec().authSpec(testData.getUser())).getProjectRequest()
-                .create(newProjectDescription)
+                .create(TestDataGenerator.generateProject(RandomData.getString(), testData.getProject().getId()))
                 .then().assertThat().statusCode(HttpStatus.SC_BAD_REQUEST)
                 .body(Matchers.containsString("Project ID \"" + testData.getProject().getId()
                         + "\" is already used by another project"));
@@ -156,23 +130,17 @@ public class ProjectTest extends BaseApiTest {
     @Test
     public void projectWithAlreadyExistingNameShouldNotBeCreated() {
         TestData testData = TestDataStorage.getStorage().addTestData();
-        testData.getUser().setRoles(TestDataGenerator.generateRoles(Role.SYSTEM_ADMIN, "g"));
+
         new CheckedUser(Specifications.getSpec().superUserSpec()).create(testData.getUser());
 
         Project project = new CheckedProject(Specifications.getSpec()
                 .authSpec(testData.getUser()))
                 .create(testData.getProject());
 
-        softy.assertThat(project.getId()).isEqualTo(testData.getProject().getId());
-
-        NewProjectDescription newProjectDescription = NewProjectDescription
-                .builder()
-                .name(testData.getProject().getName())
-                .id(RandomData.getString())
-                .build();
+        softy.assertThat(project.getName()).isEqualTo(testData.getProject().getName());
 
         new UncheckedRequests(Specifications.getSpec().authSpec(testData.getUser())).getProjectRequest()
-                .create(newProjectDescription)
+                .create(TestDataGenerator.generateProject(testData.getProject().getName(), RandomData.getString()))
                 .then().assertThat().statusCode(HttpStatus.SC_BAD_REQUEST)
                 .body(Matchers.containsString("Project with this name already exists: "
                                 + testData.getProject().getName()));
