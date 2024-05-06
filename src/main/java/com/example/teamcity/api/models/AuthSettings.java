@@ -10,8 +10,6 @@ public class AuthSettings {
     private boolean perProjectPermissions;
     private Modules modules;
 
-    // Constructor
-
     public AuthSettings() {
         this.perProjectPermissions = true;
         this.modules = new Modules();
@@ -22,9 +20,6 @@ public class AuthSettings {
         this.modules.setModule(defaultModules);
     }
 
-    // Getters and setters
-
-    // Utility method to create default module
     private Module createDefaultModule(String name, int count) {
         Module module = new Module();
         module.setName(name);
