@@ -93,7 +93,7 @@ X-TC-CSRF-Token: 71161606-08db-418d-8bf2-eef9d2282e35
 PUT http://172.31.43.219:8111/app/rest/server/authSettings
 Content-Type: application/json
 Accept: application/json
-X-TC-CSRF-Token: 71161606-08db-418d-8bf2-eef9d2282e35
+X-TC-CSRF-Token: 00005055-6f90-49c3-9e2d-a80b96bac927
 
 {
   "allowGuest": false,

@@ -42,6 +42,28 @@ public class ProjectTest extends BaseApiTest {
         softy.assertThat(project.getId()).isEqualTo(testString);
     }
 
+    @Test
+    public void projectWithSpecialSymbolsInNameCanBeCreated() {
+        String testString = "This_is_a_string_with_special_symbols :!@#$%^&*()_+-=[]{}|;:',./<>?~`\"";
+
+        TestData testData = TestDataStorage.getStorage().addTestData(TestData.builder()
+                .user(TestDataGenerator.generateUser())
+                .project(NewProjectDescription
+                        .builder()
+                        .name(testString)
+                        .id(RandomData.getString())
+                        .build())
+                .build());
+        testData.getUser().setRoles(TestDataGenerator.generateRoles(Role.SYSTEM_ADMIN, "g"));
+        new CheckedUser(Specifications.getSpec().superUserSpec()).create(testData.getUser());
+
+        Project project = new CheckedProject(Specifications.getSpec()
+                .authSpec(testData.getUser()))
+                .create(testData.getProject());
+
+        softy.assertThat(project.getName()).isEqualTo(testString);
+    }
+
 
     @Test
     public void projectWithIdBiggerThenMaxLengthShouldNotBeCreated() {
@@ -59,7 +81,7 @@ public class ProjectTest extends BaseApiTest {
 
         new UncheckedRequests(Specifications.getSpec().authSpec(testData.getUser())).getProjectRequest()
                 .create(newProjectDescription)
-                .then().assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR) //TODO: make it SC_BAD_REQUEST instead
+                .then().assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR) //TODO: should be SC_BAD_REQUEST instead
                 .body(Matchers.containsString("Project ID \"" + testString
                         + "\" is invalid: it is 226 characters long while the maximum length is 225."));
     }
@@ -80,7 +102,7 @@ public class ProjectTest extends BaseApiTest {
 
         new UncheckedRequests(Specifications.getSpec().authSpec(testData.getUser())).getProjectRequest()
                 .create(newProjectDescription)
-                .then().assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR) //TODO: make it SC_BAD_REQUEST instead
+                .then().assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR) //TODO: should be SC_BAD_REQUEST instead
                 .body(Matchers.containsString("Project ID \"" + testString
                         + "\" is invalid: contains unsupported character '$'. ID should start with a latin letter and contain only latin letters, digits and underscores (at most 225 characters)."));
     }
@@ -101,7 +123,7 @@ public class ProjectTest extends BaseApiTest {
 
         new UncheckedRequests(Specifications.getSpec().authSpec(testData.getUser())).getProjectRequest()
                 .create(newProjectDescription)
-                .then().assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR) //TODO: make it SC_BAD_REQUEST instead
+                .then().assertThat().statusCode(HttpStatus.SC_INTERNAL_SERVER_ERROR) //TODO: should be SC_BAD_REQUEST instead
                 .body(Matchers.containsString("Project ID \"" + testString
                         + "\" is invalid: starts with non-letter character"));
     }
