@@ -5,6 +5,7 @@ import com.teamcity.api.generators.TestData;
 import com.teamcity.api.generators.TestDataGenerator;
 import com.teamcity.api.generators.TestDataStorage;
 import com.teamcity.api.models.NewProjectDescription;
+import com.teamcity.api.models.Project;
 import com.teamcity.api.requests.UncheckedRequests;
 import com.teamcity.api.requests.checked.CheckedBuildConfig;
 import com.teamcity.api.requests.checked.CheckedProject;
@@ -21,11 +22,11 @@ public class BuildConfigurationTest extends BaseApiTest{
 
     @Test
     public void buildConfigurationTest(){
-        var testData = TestDataStorage.getStorage().addTestData();
+        TestData testData = TestDataStorage.getStorage().addTestData();
 
         new CheckedUser(Specifications.getSpec().superUserSpec()).create(testData.getUser());
 
-        var project = new CheckedProject(Specifications.getSpec()
+        Project project = new CheckedProject(Specifications.getSpec()
                 .authSpec(testData.getUser()))
                 .create(testData.getProject());
 
