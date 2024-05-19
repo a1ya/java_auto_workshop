@@ -1,0 +1,142 @@
+### 0. generate auth token
+GET http://admin:admin@172.31.43.219:8111/authenticationTest.html?csrf
+Accept: application/json
+
+### 0.1. generate auth token
+GET http://172.31.43.219:8111/authenticationTest.html?csrf
+Accept: application/json
+
+### 1. create project
+POST http://172.31.43.219:8111/app/rest/projects
+Content-Type: application/json
+Accept: application/json
+X-TC-CSRF-Token: b8d21aee-8bb0-4548-a9da-84ee5e3f45b8
+
+{
+  "parentProject": {
+    "locator": "_Root"
+  },
+  "name": "name22",
+  "id": "id22",
+  "copyAllAssociatedSettings": true
+}
+
+### 2. create build configuration
+POST http://172.31.43.219:8111/app/rest/buildTypes
+Content-Type: application/json
+Accept: application/json
+X-TC-CSRF-Token: eb4faedf-59e9-48d8-a54a-2361e727b179
+
+{
+  "id": "id",
+  "name": "print hello world",
+  "project": {
+    "id": "id"
+  },
+  "steps": {
+    "step": [
+      {
+        "name": "print hello world",
+        "type": "simpleRunner",
+        "properties": {
+          "property": [
+            {
+              "name": "script.content",
+              "value": "echo 'Hello World!'"
+            },
+            {
+              "name": "teamcity.step.mode",
+              "value": "default"
+            },
+            {
+              "name": "use.custom.script",
+              "value": "true"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
+
+### 2.1 get build type
+GET http://172.31.43.219:8111/app/rest/buildTypes/id
+Content-Type: application/json
+Accept: application/json
+X-TC-CSRF-Token: 7375e430-2b52-44d0-9dbf-50bbef6ee61f
+
+### 3. run build
+POST http://172.31.43.219:8111/app/rest/buildQueue
+Content-Type: application/json
+Accept: application/json
+X-TC-CSRF-Token: eb4faedf-59e9-48d8-a54a-2361e727b179
+
+{
+  "buildType": {
+    "id": "id"
+  }
+}
+
+### 4. get build status
+GET http://172.31.43.219:8111/app/rest/builds/104
+Content-Type: application/json
+Accept: application/json
+X-TC-CSRF-Token: 59792b55-fe9f-4782-bfd3-c24b2085b2a6
+
+### 6. set perProjectPermissions
+GET http://172.31.43.219:8111/app/rest/server/authSettings
+Content-Type: application/json
+Accept: application/json
+X-TC-CSRF-Token: 71161606-08db-418d-8bf2-eef9d2282e35
+
+### 5. set perProjectPermissions
+PUT http://172.31.43.219:8111/app/rest/server/authSettings
+Content-Type: application/json
+Accept: application/json
+X-TC-CSRF-Token: 00005055-6f90-49c3-9e2d-a80b96bac927
+
+{
+  "allowGuest": false,
+  "guestUsername": "guest",
+  "collapseLoginForm": false,
+  "perProjectPermissions": false,
+  "emailVerification": false,
+  "modules": {
+    "module": [
+      {
+        "name": "Default",
+        "properties": {
+          "property": [
+            {
+              "name": "usersCanResetOwnPasswords",
+              "value": "true"
+            },
+            {
+              "name": "usersCanChangeOwnPasswords",
+              "value": "true"
+            },
+            {
+              "name": "freeRegistrationAllowed",
+              "value": "false"
+            }
+          ],
+          "count": 3
+        }
+      },
+      {
+        "name": "Token-Auth",
+        "properties": {
+          "property": [],
+          "count": 0
+        }
+      },
+      {
+        "name": "HTTP-Basic",
+        "properties": {
+          "property": [],
+          "count": 0
+        }
+      }
+    ]
+  }
+}
