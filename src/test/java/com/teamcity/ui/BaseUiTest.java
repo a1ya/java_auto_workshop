@@ -1,7 +1,7 @@
 package com.teamcity.ui;
 
 import com.codeborne.selenide.Configuration;
-import com.teamcity.api.BaseTest;
+import com.teamcity.BaseTest;
 import com.teamcity.api.configs.Config;
 import com.teamcity.api.models.User;
 import com.teamcity.api.requests.checked.CheckedUser;

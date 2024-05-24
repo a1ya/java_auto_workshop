@@ -2,6 +2,7 @@ package com.teamcity.ui;
 
 import com.codeborne.selenide.Condition;
 import com.teamcity.api.generators.TestData;
+import com.teamcity.api.models.BuildType;
 import com.teamcity.api.models.Project;
 import com.teamcity.api.requests.checked.CheckedProject;
 import com.teamcity.api.spec.Specifications;
@@ -14,6 +15,7 @@ public class CreateNewBuildTest extends BaseUiTest{
     @Test
     public void projectAdminShouldBeAbleToCreateNewBuildConfigurationForProject() {
         TestData testData = testDataStorage.addTestData();
+        String expectedBuildTypeName = testData.getBuildType().getName();
         String repositoryUrl = "https://github.com/AlexPshe/spring-core-for-qa";
 
         loginAsUser(testData.getUser());
@@ -25,13 +27,20 @@ public class CreateNewBuildTest extends BaseUiTest{
         new CreateNewBuildConfigurationPage()
                 .open(project.getId())
                 .createBuildConfigurationByUrl(repositoryUrl)
-                .setupBuildConfiguration(testData.getBuildType().getName());
+                .setupBuildConfiguration(expectedBuildTypeName);
+
+        softy.assertThat(checkedWithSuperUser.getProjectRequest().get(project.getId()).getBuildTypes().getBuildType())
+                .as("Expected build type name %s not found for the project with name %s", expectedBuildTypeName, project.getName())
+                .extracting(BuildType::getName)
+                .containsExactly(expectedBuildTypeName);
 
         new ProjectPage()
                 .open(project.getId())
                 .getBuilds()
                 .stream().reduce((first, second) -> second).get()
-                .getHeader().shouldHave(Condition.text(testData.getBuildType().getName()));
+                .getHeader().shouldHave(Condition.text(expectedBuildTypeName))
+                .click();
+
     }
 
 }
