@@ -79,6 +79,9 @@ jobs:
       - name: Set up browser in config property
         run: echo "browser=firefox" >> src/main/resources/config.properties
 
+      - name: Check config.properties
+        run: cat src/main/resources/config.properties
+
       - name: Setting chmod
         run: chmod +x ./mvnw
 
