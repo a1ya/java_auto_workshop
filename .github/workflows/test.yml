@@ -74,6 +74,9 @@ jobs:
       - name: Set up browser in config property
         run: echo "browser=firefox" >> src/main/resources/config.properties
 
+      - name: Setting chmod
+        run: chmod +x ./mvnw
+
       - name: Set up TeamCity server
       # Настройка сервера при первом запуске (принятие лицензии, выбор базы данных и т.д.), реализованная в виде теста
         run: ./mvnw clean test -Dtest=SetupTest#startUpTest
