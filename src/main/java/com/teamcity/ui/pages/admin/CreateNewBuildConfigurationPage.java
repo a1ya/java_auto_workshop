@@ -1,9 +1,12 @@
 package com.teamcity.ui.pages.admin;
 
+import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
 import com.teamcity.ui.Selectors;
 import com.teamcity.ui.pages.Page;
+
+import java.time.Duration;
 
 import static com.codeborne.selenide.Selenide.element;
 
@@ -27,6 +30,7 @@ public class CreateNewBuildConfigurationPage extends Page {
     }
 
     public void setupBuildConfiguration(String buildTypeName) {
+        buildTypeNameInput.shouldBe(Condition.visible, Duration.ofSeconds(15));
         buildTypeNameInput.clear();
         buildTypeNameInput.sendKeys(buildTypeName);
         submit();
