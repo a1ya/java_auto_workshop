@@ -24,6 +24,8 @@ jobs:
       # Храним переменные как в переменных среды ($GITHUB_ENV), для использования внутри этого yml файла, так и в config.properties, для использования в тестах
       - name: Set up host config.properties
         run: echo "host=$HOST:8111" >> src/main/resources/config.properties
+      - name: Print HOST
+        run: echo $HOST
 
       - name: Pull Selenoid Firefox in progress
         run: |
@@ -46,6 +48,9 @@ jobs:
           -v $(PWD)/config:/etc/selenoid/:ro \
           -p 4444:4444 \
           aerokube/selenoid:latest-release
+
+      - name: Check Selenoid logs
+        run: docker logs selenoid
 
       # В этом степе нет смысла, так как через GitHub Actions нет доступа к Selenoid UI. Но зато это полезно при локальном запуске через act, для отладки
       - name: Run Selenoid UI
