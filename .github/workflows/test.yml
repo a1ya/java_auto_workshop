@@ -45,7 +45,7 @@ jobs:
         run: |
           docker run -d --name selenoid \
           -v /var/run/docker.sock:/var/run/docker.sock \
-          -v ${{ github.workspace }}/config:/etc/selenoid/:ro \
+          -v $GITHUB_WORKSPACE/config:/etc/selenoid/:ro \
           -p 4444:4444 \
           aerokube/selenoid:latest-release
 
@@ -68,8 +68,8 @@ jobs:
         # чтобы в рамках этого задания не тратить время на фикс подобных проблем.
         run: |
           docker run -u 0 -d --name teamcity-server \
-          -v ${{ github.workspace }}/tmp/teamcity_server/datadir:/data/teamcity_server/datadir \
-          -v ${{ github.workspace }}/tmp/teamcity_server/logs:/opt/teamcity/logs \
+          -v $GITHUB_WORKSPACE/tmp/teamcity_server/datadir:/data/teamcity_server/datadir \
+          -v $GITHUB_WORKSPACE/tmp/teamcity_server/logs:/opt/teamcity/logs \
           -p 8111:8111 \
           jetbrains/teamcity-server:2023.11.1
 
@@ -95,7 +95,7 @@ jobs:
       - name: Run TeamCity agent
         run: |
           docker run -e SERVER_URL=http://$HOST:8111 -u 0 -d --name teamcity-agent \
-          -v ${{ github.workspace }}/tmp/teamcity_agent/conf:/data/teamcity_agent/conf \
+          -v $GITHUB_WORKSPACE/tmp/teamcity_agent/conf:/data/teamcity_agent/conf \
           jetbrains/teamcity-agent:2023.11.1
 
       - name: Set up TeamCity agent
