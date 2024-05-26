@@ -79,9 +79,6 @@ jobs:
       - name: Set up browser in config property
         run: echo "browser=firefox" >> src/main/resources/config.properties
 
-      - name: Check config.properties
-        run: cat src/main/resources/config.properties
-
       - name: Setting chmod
         run: chmod +x ./mvnw
 
@@ -94,6 +91,9 @@ jobs:
         run: echo "SUPER_USER_TOKEN=$(docker logs teamcity-server | grep 'Super user authentication token' | tail -n 1 | awk '{print $6}')" >> $GITHUB_ENV
       - name: Set up superUserToken config property
         run: echo "superUserToken=$SUPER_USER_TOKEN" >> src/main/resources/config.properties
+
+      - name: Check config.properties
+        run: cat src/main/resources/config.properties
 
       - name: Run TeamCity agent
         run: |
