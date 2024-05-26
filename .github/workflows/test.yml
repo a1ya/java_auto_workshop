@@ -44,7 +44,7 @@ jobs:
         run: |
           docker run -d --name selenoid \
           -v /var/run/docker.sock:/var/run/docker.sock \
-          -v C:/Users/alevt/AquaProjects/java_auto_workshop/config:/etc/selenoid/:ro \
+          -v $(PWD)/config:/etc/selenoid/:ro \
           -p 4444:4444 \
           aerokube/selenoid:latest-release
 
@@ -67,8 +67,8 @@ jobs:
         # чтобы в рамках этого задания не тратить время на фикс подобных проблем.
         run: |
           docker run -u 0 -d --name teamcity-server \
-          -v C:/Users/alevt/AquaProjects/java_auto_workshop/tmp/teamcity_server/datadir:/data/teamcity_server/datadir \
-          -v C:/Users/alevt/AquaProjects/java_auto_workshop/tmp/teamcity_server/logs:/opt/teamcity/logs \
+          -v $(PWD)/tmp/teamcity_server/datadir:/data/teamcity_server/datadir \
+          -v $(PWD)/tmp/teamcity_server/logs:/opt/teamcity/logs \
           -p 8111:8111 \
           jetbrains/teamcity-server:2023.11.1
 
@@ -94,7 +94,7 @@ jobs:
       - name: Run TeamCity agent
         run: |
           docker run -e SERVER_URL=http://$HOST:8111 -u 0 -d --name teamcity-agent \
-          -v C:/Users/alevt/AquaProjects/java_auto_workshop/tmp/teamcity_agent/conf:/data/teamcity_agent/conf \
+          -v $(PWD)/tmp/teamcity_agent/conf:/data/teamcity_agent/conf \
           jetbrains/teamcity-agent:2023.11.1
 
       - name: Set up TeamCity agent
