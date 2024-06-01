@@ -42,13 +42,11 @@ jobs:
         run: |
           docker pull selenoid/vnc_opera:76.0
 
-      #Для локального прогона
-      - name: Set up MY_PATH for local run
-        #if: runner.os == 'Windows'
+      # заменить путь для локального запуска на винде, при remote запуске остаётся просто GITHUB_WORKSPACE
+      - name: Set up MY_PATH
         run: |
           echo "MY_PATH=${GITHUB_WORKSPACE/"/mnt/c"/"C:"}" >> $GITHUB_ENV
-      - name: Print MY_PATH
-        run: echo $MY_PATH
+          echo $MY_PATH
 
       #-v C:/Users/alevt/AquaProjects/java_auto_workshop/config:/etc/selenoid/:ro \
       - name: Run Selenoid
