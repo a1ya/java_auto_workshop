@@ -7,11 +7,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           java-version: '17'
           distribution: 'zulu'
+
+
 
       # По умолчанию в ubuntu отсутствует команда ifconfig
       - name: Install ifconfig
@@ -39,13 +42,20 @@ jobs:
         run: |
           docker pull selenoid/vnc_opera:76.0
 
+      #Для локального прогона
+      - name: Set up MY_PATH for local run
+        #if: runner.os == 'Windows'
+        run: |
+          echo "MY_PATH=${GITHUB_WORKSPACE/"/mnt/c"/"C:"}" >> $GITHUB_ENV
+      - name: Print MY_PATH
+        run: echo $MY_PATH
+
+      #-v C:/Users/alevt/AquaProjects/java_auto_workshop/config:/etc/selenoid/:ro \
       - name: Run Selenoid
-        # Флаг -d запускает контейнер в фоновом режиме (так как, например, контейнер с сервером не имеет окончания, он просто всегда включен,
-        # и если мы без этого флага в него перейдем, то никогда не сможем перешагнуть к следующему степу
         run: |
           docker run -d --name selenoid \
           -v /var/run/docker.sock:/var/run/docker.sock \
-          -v $GITHUB_WORKSPACE/config:/etc/selenoid/:ro \
+          -v ${MY_PATH}/config:/etc/selenoid/:ro \
           -p 4444:4444 \
           aerokube/selenoid:latest-release
 
