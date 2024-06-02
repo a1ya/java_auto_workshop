@@ -131,10 +131,10 @@ jobs:
       - name: Publish test report
         uses: peaceiris/actions-gh-pages@v3
         if: always()
-        with:
-          github_token: $
-          publish_branch: gh-pages
-          publish_dir: allure-history
+        env:
+          PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: allure-history
 
       # Создание репорта с покрытием API тестов, основанного на Swagger.
       # Документация: https://github.com/viclovsky/swagger-coverage
