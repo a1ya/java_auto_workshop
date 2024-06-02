@@ -141,9 +141,6 @@ jobs:
       - name: Download Swagger Coverage
         if: always()
         run: wget https://github.com/viclovsky/swagger-coverage/releases/download/1.5.0/swagger-coverage-1.5.0.zip
-
-      - name: List files for debugging
-        run: ls -R
           
       - name: Unzip Swagger Coverage
         if: always()
