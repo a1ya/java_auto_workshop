@@ -150,10 +150,13 @@ jobs:
         run: unzip swagger-coverage-1.5.0.zip
 
       - name: Verify extracted files
-        run: ls -l swagger-coverage-1.5.0/bin/
+        run: ls -l swagger-coverage-commandline-1.5.0/bin/
+
+      - name: Verify files
+        run: ls -l
 
       - name: Run Swagger coverage
-        run: .swagger-coverage-commandline-1.5.0/bin/swagger-coverage-commandline -s http://$HOST:8111/app/rest/swagger.json -i target/swagger-coverage-output
+        run: swagger-coverage-commandline-1.5.0/bin/swagger-coverage-commandline -s http://$HOST:8111/app/rest/swagger.json -i target/swagger-coverage-output
 
       # Swagger coverage репорт сохраняется в артефакты GitHub Actions прогона
       - name: Save Swagger coverage
