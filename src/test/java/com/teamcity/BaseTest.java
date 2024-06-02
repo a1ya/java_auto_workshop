@@ -1,4 +1,4 @@
-package com.teamcity.api;
+package com.teamcity;
 
 import com.teamcity.api.generators.TestDataStorage;
 import com.teamcity.api.requests.CheckedRequests;

@@ -7,31 +7,29 @@ import com.teamcity.ui.pages.Page;
 
 import static com.codeborne.selenide.Selenide.element;
 
-public class CreateNewProjectPage extends Page {
+public class CreateNewBuildConfigurationPage extends Page {
 
     private final SelenideElement urlInput = element(Selectors.byId("url"));
-    private final SelenideElement projectNameInput = element(Selectors.byId("projectName"));
     private final SelenideElement buildTypeNameInput = element(Selectors.byId("buildTypeName"));
 
-    public CreateNewProjectPage open(String parentProjectId) {
+    public CreateNewBuildConfigurationPage open(String projectId) {
         Selenide.open("/admin/createObjectMenu.html?projectId="
-                + parentProjectId + "&showMode=createProjectMenu");
+                + projectId + "&showMode=createBuildTypeMenu");
         waitUntilPageIsLoaded();
         return this;
     }
 
-    public CreateNewProjectPage createProjectByUrl(String url) {
+    public CreateNewBuildConfigurationPage createBuildConfigurationByUrl(String url) {
         urlInput.sendKeys(url);
         submit();
         waitUntilPageIsLoaded();
         return this;
     }
 
-    public void setupProject(String projectName, String buildTypeName) {
-        projectNameInput.clear();
+    public void setupBuildConfiguration(String buildTypeName) {
         buildTypeNameInput.clear();
-        projectNameInput.sendKeys(projectName);
         buildTypeNameInput.sendKeys(buildTypeName);
         submit();
     }
+
 }

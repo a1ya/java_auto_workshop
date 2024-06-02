@@ -5,7 +5,8 @@ import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
 import com.teamcity.ui.Selectors;
-import com.teamcity.ui.elements.ProjectElement;
+import com.teamcity.ui.elements.BuildElement;
+import com.teamcity.ui.pages.Page;
 
 import java.time.Duration;
 import java.util.List;
@@ -13,26 +14,23 @@ import java.util.List;
 import static com.codeborne.selenide.Selenide.element;
 import static com.codeborne.selenide.Selenide.elements;
 
-public class ProjectsPage extends FavouritesPage {
-
-    private static final String FAVOURITE_PROJECTS_URL = "/favorite/projects?mode=builds";
+public class ProjectPage extends Page {
 
     private final SelenideElement header = element(Selectors.byClass("ProjectPageHeader__title--ih"));
-    private final ElementsCollection subprojects = elements(Selectors.byClass("Subproject__container--Px"));
+    private final ElementsCollection builds = elements(Selectors.byClass("BuildTypeLine__buildTypeInfo--Zh"));
 
-    public void waitUntilProjectsPageIsLoaded() {
+    public void waitUntilProjectPageIsLoaded() {
         waitUntilPageIsLoaded();
         header.shouldBe(Condition.visible, Duration.ofSeconds(10));
     }
 
-    public ProjectsPage open() {
-        Selenide.open(FAVOURITE_PROJECTS_URL);
-        waitUntilProjectsPageIsLoaded();
+    public ProjectPage open(String projectId) {
+        Selenide.open("/project/" + projectId);
+        waitUntilProjectPageIsLoaded();
         return this;
     }
 
-    public List<ProjectElement> getSubprojects(){
-        return generatePageElements(subprojects, ProjectElement::new);
+    public List<BuildElement> getBuilds(){
+        return generatePageElements(builds, BuildElement::new);
     }
-
 }

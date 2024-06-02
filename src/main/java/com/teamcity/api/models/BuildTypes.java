@@ -5,14 +5,13 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Builder
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Project {
-    private String id;
-    private String name;
-    private String parentProjectId;
-    private String locator;
-    private BuildTypes buildTypes;
+public class BuildTypes {
+    private String count;
+    private List<BuildType> buildType;
 }
