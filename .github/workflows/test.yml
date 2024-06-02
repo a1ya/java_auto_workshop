@@ -29,10 +29,11 @@ jobs:
       - name: Print HOST
         run: echo $HOST
 
-      # заменить путь для локального запуска на винде, при remote запуске остаётся просто GITHUB_WORKSPACE
+      # modifying current path for local run on Windows,
+      # for remote run in GithubActions it is still GITHUB_WORKSPACE
       - name: Set up MY_PATH
         run: |
-          echo "MY_PATH=${GITHUB_WORKSPACE/"/mnt/c"/"C:"}" >> $GITHUB_ENV
+          echo "MY_PATH=${GITHUB_WORKSPACE/"/mnt/c/"/"C:/"}" >> $GITHUB_ENV
           echo $MY_PATH
 
       # running selenoid (with MY_PATH)
@@ -63,11 +64,6 @@ jobs:
           --selenoid-uri http://$HOST:4444
 
       - name: Run TeamCity server
-        # Флаг -u 0 запускает контейнер от имени root, чтобы был доступ на запись файлов в директории, указанные в volume.
-        # По-хорошему, надо делать chown -R 1000:1000 на эти директории и запускать контейнер без этого флага,
-        # но это усложнение пайплайна и не приоритет в контексте данного задания.
-        # Указываем конкретную версию для сервера и агента, так как мало ли, в новой версии могут поменяться используемые локаторы,
-        # чтобы в рамках этого задания не тратить время на фикс подобных проблем.
         run: |
           docker run -u 0 -d --name teamcity-server \
           -v $GITHUB_WORKSPACE/tmp/teamcity_server/datadir:/data/teamcity_server/datadir \
@@ -85,7 +81,7 @@ jobs:
         run: chmod +x ./mvnw
 
       - name: Set up TeamCity server
-      # Настройка сервера при первом запуске (принятие лицензии, выбор базы данных и т.д.), реализованная в виде теста
+        # Настройка сервера при первом запуске (принятие лицензии, выбор базы данных и т.д.), реализованная в виде теста
         run: ./mvnw clean test -Dtest=SetupTest#startUpTest
 
       - name: Set up superUserToken environment variable
@@ -113,3 +109,46 @@ jobs:
 
       - name: Run UI tests
         run: ./mvnw test -DsuiteXmlFile="testng-suites/ui-suites.xml"
+
+
+      - name: Load test report history
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+
+      - name: Build test report
+        uses: simple-elf/allure-report-action@v1.7
+        if: always()
+        with:
+          gh_pages: gh-pages
+          allure_history: allure-history
+          allure_results: target/allure-results
+
+      - name: Publish test report
+        uses: peaceiris/actions-gh-pages@v3
+        if: always()
+        with:
+          github_token: $
+          publish_branch: gh-pages
+          publish_dir: allure-history
+
+      # Создание репорта с покрытием API тестов, основанного на Swagger.
+      # Документация: https://github.com/viclovsky/swagger-coverage
+      - name: Run Swagger coverage
+        if: always()
+        run: .swagger-coverage-commandline/bin/swagger-coverage-commandline -s http://$HOST:8111/app/rest/swagger.json -i target/swagger-coverage-output
+
+
+      # Swagger coverage репорт сохраняется в артефакты GitHub Actions прогона
+      - name: Save Swagger coverage
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: swagger-coverage
+          path: |
+            swagger-coverage-report.html
+            swagger-coverage-results.json
